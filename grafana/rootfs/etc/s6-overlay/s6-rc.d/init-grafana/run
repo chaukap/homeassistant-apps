@@ -1,0 +1,57 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Grafana
+# Configures Grafana
+# ==============================================================================
+declare name
+declare url
+
+# Ensure the persistent plugin directory exists
+mkdir -p /data/plugins
+
+# Ensure the provisioning directories exist in the add-on configuration
+# directory, so users can provision datasources & dashboards from files
+mkdir -p \
+    /config/provisioning/alerting \
+    /config/provisioning/dashboards \
+    /config/provisioning/datasources \
+    /config/provisioning/plugins
+
+# Sets unique secret key used for signing cookies.
+if ! bashio::fs.file_exists "/data/secret"; then
+    echo "${SUPERVISOR_TOKEN}" > /data/secret
+fi
+
+# Sets shared token used to authenticate against the image renderer.
+# Grafana refuses to start with the default renderer token.
+if ! bashio::fs.file_exists "/data/renderer_token"; then
+    cat /proc/sys/kernel/random/uuid > /data/renderer_token
+fi
+
+# Install user configured/requested Grafana plugins
+if bashio::config.has_value 'plugins'; then
+    for plugin in $(bashio::config 'plugins'); do
+        if bashio::fs.directory_exists "/data/plugins/${plugin}"; then
+            bashio::log.debug "Plugin ${plugin} is already installed, skipping"
+            continue
+        fi
+        grafana cli --pluginsDir "/data/plugins" plugins install "$plugin" \
+            || bashio::exit.nok "Failed installing Grafana plugin: ${plugin}"
+    done
+fi
+
+# Install user configured/requested Grafana custom plugins (from URL)
+if bashio::config.has_value 'custom_plugins'; then
+    for plugin in $(bashio::config 'custom_plugins|keys'); do
+        name=$(bashio::config "custom_plugins[${plugin}].name")
+        url=$(bashio::config "custom_plugins[${plugin}].url")
+        if bashio::fs.directory_exists "/data/plugins/${name}"; then
+            bashio::log.debug "Custom plugin ${name} is already installed, skipping"
+            continue
+        fi
+        bashio::log.debug "Installing custom plugin ${name} from ${url}"
+        grafana cli --pluginsDir "/data/plugins" --pluginUrl ${url} plugins install $name \
+            || bashio::exit.nok "Failed installing Grafana custom plugin: ${name} from: ${url}"
+    done
+fi
