@@ -1,0 +1,80 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Grafana
+# Runs the Grafana Server
+# ==============================================================================
+declare -a options
+declare -a unsigned_plugins
+declare ingress_entry
+declare log_level
+declare name
+declare secret
+declare value
+
+# Wait for Memcached to become available
+bashio::net.wait_for 11211
+
+bashio::log.info 'Starting Grafana...'
+
+options+=(--config="/etc/grafana/grafana.ini")
+options+=(--homepath="/usr/share/grafana")
+
+# Configures Grafana with the add-on log level
+log_level="info"
+if bashio::config.exists 'log_level'; then
+    case "$(bashio::string.lower "$(bashio::config 'log_level')")" in
+        all|trace|debug)
+            log_level="debug"
+            ;;
+        info|notice)
+            log_level="info"
+            ;;
+        warning)
+            log_level="warn"
+            ;;
+        error)
+            log_level="error"
+            ;;
+        fatal|off)
+            log_level="critical"
+            ;;
+    esac
+fi
+export "GF_LOG_LEVEL=${log_level}"
+
+# Use the persisted unique secret key used for signing cookies
+secret=$(</data/secret)
+export "GF_SECURITY_SECRET_KEY=${secret}"
+
+# Configure the public facing URL, based on the Ingress entry
+ingress_entry=$(bashio::addon.ingress_entry)
+export "GF_SERVER_ROOT_URL=http://localhost:3000${ingress_entry}"
+
+# Connect Grafana to the bundled image renderer service
+export "GF_RENDERING_SERVER_URL=http://127.0.0.1:8081/render"
+export "GF_RENDERING_CALLBACK_URL=http://127.0.0.1:3000/"
+export "GF_RENDERING_RENDERER_TOKEN=$(</data/renderer_token)"
+
+# Load custom environment variables
+for var in $(bashio::config 'env_vars|keys'); do
+    name=$(bashio::config "env_vars[${var}].name")
+    value=$(bashio::config "env_vars[${var}].value")
+    bashio::log.info "Setting ${name} to ${value}"
+    export "${name}=${value}"
+done
+
+# Verify if we have unsigned custom plugins to load
+if bashio::config.has_value 'custom_plugins'; then
+    for plugin in $(bashio::config 'custom_plugins|keys'); do
+        name=$(bashio::config "custom_plugins[${plugin}].name")
+        if bashio::config.true "custom_plugins[${plugin}].unsigned"; then
+            unsigned_plugins+="${name},"
+        fi
+    done
+    export "GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=${unsigned_plugins}"
+fi
+
+
+# Run Grafana (the grafana-server binary was removed in Grafana 13)
+exec grafana server "${options[@]}"

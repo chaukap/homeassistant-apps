@@ -1,0 +1,16 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Grafana
+# Runs the Grafana Image Renderer service
+# ==============================================================================
+bashio::log.info 'Starting Grafana Image Renderer...'
+
+# Run Grafana Image Renderer. Chromium's default /dev/shm usage is too
+# large for the container's shared memory allotment, causing crashes on
+# bigger panels, so it is told to use /tmp instead.
+exec grafana-image-renderer server \
+    --server.addr=127.0.0.1:8081 \
+    --server.auth-token="$(</data/renderer_token)" \
+    --browser.path=/usr/bin/chromium \
+    --browser.flag=--disable-dev-shm-usage
