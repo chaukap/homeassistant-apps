@@ -1,0 +1,89 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant App: GoToSocial
+# Keeps a Route53 AAAA record pointed at this host's public IPv6 address,
+# for CloudFront (or direct) IPv6 origins on connections without a
+# dedicated IPv4 address
+# ==============================================================================
+declare access_key_id
+declare current_ip
+declare interval
+declare last_ip
+declare record
+declare secret_access_key
+declare ttl
+declare zone_id
+
+if ! bashio::config.true 'route53_ddns.enabled'; then
+    bashio::log.info 'Route53 DDNS is disabled, skipping'
+    s6-svc -O /run/service/route53-ddns
+    exit 0
+fi
+
+bashio::config.require 'route53_ddns.zone_id' \
+    "Route53 DDNS requires the hosted zone ID"
+bashio::config.require 'route53_ddns.aws_access_key_id' \
+    "Route53 DDNS requires AWS credentials"
+bashio::config.require 'route53_ddns.aws_secret_access_key' \
+    "Route53 DDNS requires AWS credentials"
+
+zone_id=$(bashio::config 'route53_ddns.zone_id')
+access_key_id=$(bashio::config 'route53_ddns.aws_access_key_id')
+secret_access_key=$(bashio::config 'route53_ddns.aws_secret_access_key')
+record=$(bashio::config 'route53_ddns.record' "$(bashio::config 'host')")
+interval=$(bashio::config 'route53_ddns.interval' '300')
+ttl=$(bashio::config 'route53_ddns.ttl' '60')
+
+bashio::log.info \
+    "Route53 DDNS keeping AAAA record '${record}' current" \
+    "(zone ${zone_id}, every ${interval}s)"
+
+last_ip=""
+while true; do
+    if current_ip=$(curl -fsS -6 --max-time 30 https://api6.ipify.org); then
+        if [[ "${current_ip}" != "${last_ip}" ]]; then
+            bashio::log.info \
+                "Public IPv6 address is ${current_ip}, updating '${record}'"
+            if curl -fsS -X POST \
+                --aws-sigv4 "aws:amz:us-east-1:route53" \
+                --user "${access_key_id}:${secret_access_key}" \
+                -H "Content-Type: text/xml" \
+                --data @- \
+                "https://route53.amazonaws.com/2013-04-01/hostedzone/${zone_id}/rrset" \
+                > /dev/null <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<ChangeResourceRecordSetsRequest xmlns="https://route53.amazonaws.com/doc/2013-04-01/">
+  <ChangeBatch>
+    <Changes>
+      <Change>
+        <Action>UPSERT</Action>
+        <ResourceRecordSet>
+          <Name>${record}.</Name>
+          <Type>AAAA</Type>
+          <TTL>${ttl}</TTL>
+          <ResourceRecords>
+            <ResourceRecord>
+              <Value>${current_ip}</Value>
+            </ResourceRecord>
+          </ResourceRecords>
+        </ResourceRecordSet>
+      </Change>
+    </Changes>
+  </ChangeBatch>
+</ChangeResourceRecordSetsRequest>
+EOF
+            then
+                last_ip="${current_ip}"
+                bashio::log.info "Route53 record updated"
+            else
+                bashio::log.warning \
+                    "Route53 update failed, will retry in ${interval}s"
+            fi
+        fi
+    else
+        bashio::log.warning \
+            "Could not determine the public IPv6 address; is IPv6 available?"
+    fi
+    sleep "${interval}"
+done

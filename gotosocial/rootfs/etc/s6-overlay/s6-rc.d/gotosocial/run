@@ -1,0 +1,10 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant App: GoToSocial
+# Runs the GoToSocial server
+# ==============================================================================
+
+bashio::log.info 'Starting GoToSocial...'
+
+exec gotosocial --config-path /etc/gotosocial/config.yaml server start

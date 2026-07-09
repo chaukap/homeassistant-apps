@@ -1,0 +1,44 @@
+---
+name: GoToSocial
+version: "0.21.2"
+slug: gotosocial
+description: Lightweight single-user fediverse server, compatible with Mastodon apps
+url: https://github.com/chaukap/homeassistant-apps
+startup: services
+init: false
+host_network: true
+arch:
+  - aarch64
+  - amd64
+map:
+  - type: addon_config
+    read_only: false
+options:
+  host: ""
+  port: 8080
+  letsencrypt: false
+  trusted_proxies: []
+  log_level: info
+  route53_ddns:
+    enabled: false
+schema:
+  host: str
+  account_domain: str?
+  port: port
+  letsencrypt: bool
+  letsencrypt_email: str?
+  trusted_proxies:
+    - str
+  landing_page_user: str?
+  log_level: list(trace|debug|info|warn|error)?
+  initial_account_username: str?
+  initial_account_email: str?
+  initial_account_password: password?
+  route53_ddns:
+    enabled: bool
+    zone_id: str?
+    record: str?
+    aws_access_key_id: str?
+    aws_secret_access_key: password?
+    interval: int?
+    ttl: int?
