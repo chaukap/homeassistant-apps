@@ -1,0 +1,45 @@
+---
+name: Prometheus
+version: "3.5.0"
+slug: prometheus
+description: Systems monitoring toolkit with a time-series database
+url: https://github.com/chaukap/homeassistant-apps
+startup: services
+ingress: true
+ingress_port: 9090
+init: false
+panel_icon: mdi:fire
+panel_title: Prometheus
+homeassistant_api: true
+arch:
+  - aarch64
+  - amd64
+map:
+  - type: addon_config
+    read_only: false
+options:
+  scrape_interval: 15
+  evaluation_interval: 15
+  retention_time: 15d
+  scrape_homeassistant: true
+  scrape_configs: []
+ports:
+  9090/tcp: null
+ports_description:
+  9090/tcp: >-
+    Prometheus web UI and API. Not required for Ingress or for other
+    add-ons (e.g. Grafana) on the internal network
+schema:
+  log_level: list(debug|info|warn|error)?
+  scrape_interval: int(1,)
+  evaluation_interval: int(1,)
+  retention_time: match(^\d+(ms|s|m|h|d|w|y)$)
+  retention_size: match(^\d+(B|KB|MB|GB|TB|PB|EB)$)?
+  scrape_homeassistant: bool
+  scrape_configs:
+    - job_name: str
+      targets:
+        - str
+      scrape_interval: int?
+      metrics_path: str?
+      scheme: list(http|https)?
