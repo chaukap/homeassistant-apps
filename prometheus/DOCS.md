@@ -87,17 +87,20 @@ this app's config directory, visible on the host at
 `/addon_configs/<repo-hash>_prometheus/` (reachable via the Samba or
 SSH add-ons):
 
-- `scrape_configs/*.yaml` — files containing a list of Prometheus
-  [scrape configurations][prom-scrape-config], loaded via
-  `scrape_config_files`. Example `scrape_configs/example.yaml`:
+- `scrape_configs/*.yaml` — files containing Prometheus
+  [scrape configurations][prom-scrape-config] under a top-level
+  `scrape_configs:` key, loaded via `scrape_config_files`. A bare list
+  without that key fails validation. Example
+  `scrape_configs/example.yaml`:
 
   ```yaml
-  - job_name: printer
-    static_configs:
-      - targets: ["192.168.1.50:9100"]
-    basic_auth:
-      username: metrics
-      password: secret
+  scrape_configs:
+    - job_name: printer
+      static_configs:
+        - targets: ["192.168.1.50:9100"]
+      basic_auth:
+        username: metrics
+        password: secret
   ```
 
 - `rules/*.yaml` — Prometheus [rule files][prom-rules] with recording
