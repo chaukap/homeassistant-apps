@@ -46,6 +46,17 @@ token needed) and any other targets on your network, with the web UI
 available through Ingress — the natural data source for the Grafana
 add-on. Developed directly in this repository.
 
+### [BirdWeather Exporter](birdweather_exporter/)
+
+![Latest Version][birdweather-version-shield]
+![Supports aarch64][aarch64-shield] ![Supports amd64][amd64-shield]
+
+Prometheus exporter for BirdWeather stations like the PUC — polls the
+BirdWeather API and exposes per-species detection counts, confidence
+breakdowns, and station totals as metrics, ready to be scraped by the
+Prometheus add-on and graphed in Grafana. Developed in
+[chaukap/birdweather-prometheus-exporter][birdweather-exporter].
+
 ### [GoToSocial](gotosocial/)
 
 ![Latest Version][gotosocial-version-shield]
@@ -81,6 +92,8 @@ MIT License — see [LICENSE](LICENSE).
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [addon-grafana]: https://github.com/chaukap/addon-grafana
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[birdweather-exporter]: https://github.com/chaukap/birdweather-prometheus-exporter
+[birdweather-version-shield]: https://img.shields.io/badge/version-0.1.0-blue.svg
 [gotosocial-version-shield]: https://img.shields.io/badge/version-0.21.2-blue.svg
 [grafana-version-shield]: https://img.shields.io/badge/version-13.0.1-blue.svg
 [prometheus-version-shield]: https://img.shields.io/badge/version-3.5.0-blue.svg
