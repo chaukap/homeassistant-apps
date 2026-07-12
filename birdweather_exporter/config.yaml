@@ -1,0 +1,28 @@
+---
+name: BirdWeather Exporter
+version: "0.1.0"
+slug: birdweather_exporter
+description: Prometheus exporter for BirdWeather stations (e.g. the PUC)
+url: https://github.com/chaukap/homeassistant-apps
+startup: services
+init: false
+watchdog: http://[HOST]:[PORT:9743]/healthz
+arch:
+  - aarch64
+  - amd64
+options:
+  station_token: ""
+  query_interval: 5m
+  period: day
+  species_limit: 100
+ports:
+  9743/tcp: null
+ports_description:
+  9743/tcp: >-
+    Metrics endpoint. Not required for the Prometheus add-on or anything
+    else on the internal add-on network
+schema:
+  station_token: password
+  query_interval: match(^\d+(s|m|h)$)
+  period: list(day|week|month|all)
+  species_limit: int(1,100)
