@@ -1,0 +1,30 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant App: Prometheus
+# Runs the Prometheus server
+# ==============================================================================
+declare -a options
+
+options+=(--config.file=/etc/prometheus/prometheus.yml)
+options+=(--storage.tsdb.path=/data/prometheus)
+options+=(--storage.tsdb.retention.time="$(bashio::config 'retention_time' '15d')")
+options+=(--web.listen-address=0.0.0.0:9090)
+options+=(--web.enable-lifecycle)
+
+# Serve from the root while generating links that work through Home
+# Assistant Ingress — only the path portion of the external URL matters
+options+=(--web.external-url="http://homeassistant.local:8123$(bashio::addon.ingress_entry)")
+options+=(--web.route-prefix=/)
+
+if bashio::config.has_value 'retention_size'; then
+    options+=(--storage.tsdb.retention.size="$(bashio::config 'retention_size')")
+fi
+
+if bashio::config.has_value 'log_level'; then
+    options+=(--log.level="$(bashio::config 'log_level')")
+fi
+
+bashio::log.info 'Starting Prometheus...'
+
+exec prometheus "${options[@]}"
