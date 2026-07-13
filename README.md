@@ -70,7 +70,7 @@ MIT License — see [LICENSE](LICENSE).
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [addon-grafana]: https://github.com/chaukap/addon-grafana
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[gotosocial-version-shield]: https://img.shields.io/badge/version-0.21.2-blue.svg
+[gotosocial-version-shield]: https://img.shields.io/badge/version-0.21.2.1-blue.svg
 [grafana-version-shield]: https://img.shields.io/badge/version-13.0.1-blue.svg
 [repo-badge]: https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg
 [repo-url]: https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fchaukap%2Fhomeassistant-apps
