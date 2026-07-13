@@ -1,6 +1,6 @@
 ---
 name: GoToSocial
-version: "0.21.2"
+version: "0.21.2.1"
 slug: gotosocial
 description: Lightweight single-user fediverse server, compatible with Mastodon apps
 url: https://github.com/chaukap/homeassistant-apps
