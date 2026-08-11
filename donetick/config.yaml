@@ -1,0 +1,27 @@
+---
+name: DoneTick
+version: "0.1.76"
+slug: donetick
+description: Task and chore management with recurring tasks and shared circles
+url: https://github.com/chaukap/homeassistant-apps
+startup: services
+init: false
+webui: http://[HOST]:[PORT:2021]
+panel_icon: mdi:checkbox-marked-circle-outline
+arch:
+  - aarch64
+  - amd64
+ports:
+  2021/tcp: 2021
+ports_description:
+  2021/tcp: DoneTick web UI and API
+options:
+  disable_signups: false
+  log_level: info
+schema:
+  public_host: str?
+  disable_signups: bool
+  jwt_secret: password?
+  telegram_token: password?
+  pushover_token: password?
+  log_level: list(debug|info|warn|error)?
