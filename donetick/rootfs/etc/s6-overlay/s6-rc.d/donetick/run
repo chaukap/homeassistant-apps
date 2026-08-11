@@ -1,0 +1,17 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant App: DoneTick
+# Runs the DoneTick server
+# ==============================================================================
+
+bashio::log.info 'Starting DoneTick...'
+
+# DoneTick resolves its config as ./config/${DT_ENV}.yaml relative to the
+# working directory, so run it from the directory the init step rendered into
+cd /etc/donetick || bashio::exit.nok 'Could not change into /etc/donetick'
+
+export DT_ENV=selfhosted
+export DT_SQLITE_PATH=/data/donetick.db
+
+exec donetick

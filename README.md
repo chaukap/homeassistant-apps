@@ -68,6 +68,18 @@ no external database) with an optional Route53 dynamic-DNS sidecar for
 CloudFront IPv6-origin deployments. Developed directly in this
 repository.
 
+### [DoneTick](donetick/)
+
+![Latest Version][donetick-version-shield]
+![Supports aarch64][aarch64-shield] ![Supports amd64][amd64-shield]
+
+Task and chore management for the household — recurring schedules,
+shared circles, assignee rotation, points, and optional Telegram or
+Pushover notifications. A single [DoneTick][donetick-upstream] binary
+with the web frontend embedded and SQLite underneath, so everything
+rides along in Home Assistant backups. Developed directly in this
+repository.
+
 ## Development workflow
 
 Each add-on is developed in its own repository; this repository is the
@@ -92,6 +104,8 @@ MIT License — see [LICENSE](LICENSE).
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [addon-grafana]: https://github.com/chaukap/addon-grafana
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[donetick-upstream]: https://github.com/donetick/donetick
+[donetick-version-shield]: https://img.shields.io/badge/version-0.1.76-blue.svg
 [gotosocial-version-shield]: https://img.shields.io/badge/version-0.21.2.1-blue.svg
 [birdweather-exporter]: https://github.com/chaukap/birdweather-prometheus-exporter
 [birdweather-version-shield]: https://img.shields.io/badge/version-0.1.0-blue.svg
